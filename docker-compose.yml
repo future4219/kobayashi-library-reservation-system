@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0  # MySQLのバージョンを指定
+    container_name: my-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword   # rootユーザーのパスワード
+      MYSQL_DATABASE: testdb              # デフォルトで作成するデータベース
+      MYSQL_USER: user                    # 任意のユーザー名
+      MYSQL_PASSWORD: password            # 任意のユーザーパスワード
+    ports:
+      - "3306:3306"  # ホストの3306ポートをコンテナの3306ポートにマッピング
+    volumes:
+      - ./mysql_data:/var/lib/mysql  # データを永続化するためのボリュームマウント
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+
+  app:
+    build: .  # Goアプリケーションのビルド設定
+    container_name: go-api-server
+    ports:
+      - "8080:8080"  # Goアプリケーションが提供するAPIのポートをマッピング
+    environment:
+      DATABASE_URL: "mysql://user:password@tcp(mysql:3306)/testdb"  # MySQLの接続情報
+    depends_on:
+      - mysql  # MySQLが起動するのを待ってからアプリを起動
+    networks:
+      - app-network
+    volumes:
+      - .:/app  # プロジェクト全体をコンテナにマウントして、コードの変更を即反映
+
+networks:
+  app-network:
+    driver: bridge
