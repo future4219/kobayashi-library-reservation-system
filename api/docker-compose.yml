@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0  # MySQLのバージョンを指定
+    container_name: my-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword   # rootユーザーのパスワード
+      MYSQL_DATABASE: testdb              # デフォルトで作成するデータベース
+      MYSQL_USER: user                    # 任意のユーザー名
+      MYSQL_PASSWORD: password            # 任意のユーザーパスワード
+    ports:
+      - "3306:3306"  # ホストの3306ポートをコンテナの3306ポートにマッピング
+    volumes:
+      - ./mysql_data:/var/lib/mysql  # データを永続化するためのボリュームマウント
